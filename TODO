@@ -1,0 +1,48 @@
+FEATURES:
+
+  (done) Use Require.js and build loading system.
+  - Focusing when clicking on a tile.
+  - Loading indicator/screen for tiles.
+  - tile.hoverout property & tile.onHoverout() method.
+  - Drag & drop within a tile w/scrolling.
+  - Add error handling to the bind system.
+  - Add auto re-binding of events to models that get replaced within the option system..
+
+BUGS:
+
+  - Sometimes when you drag, the drop-zone cover appears below the tile being dragged.
+  - Dragging and dropping out-of-zone sometimes looses a tile.
+  - Dragging or closing a tile at the bottom of the screen sometimes causes dash issues.
+
+  (fixed) When dragging, sometimes the bottom tile disappears at the beginning of the drag.
+    I'm pretty sure this was caused by the same parent binding problem as the issue below.
+
+  (fixed) After dragging a tile, if you move it, it becomes the size of the full screen.
+    This bug was the unforseen consequence of refactoring the option object.  When I rebuilt
+    the way it handles setters and getters, I eliminated the target property of the schema
+    because it was encapsulated within the setter/getter closure.  Well, the target property
+    can't be removed because it's how we know what schema options to unbind when detaching from
+    a parent.  Since there was no target, parent bindings weren't able to detach, and tiles
+    that had been dragged were keeping their bindings to the root node. Hence, when modified,
+    these tiles would mark their old parent, which in the case of a dragged tile was the root node, 
+    and were being positioned by the root while being a child of a resizer tile.
+
+  (fixed) After dragging a tile, if you drop something into it, the dropped tile disappears.
+    I think this had to do with the resizer pruning bug I just fixed, because I'm not 
+    seeing the problem any longer.  I doubt it had anything to do with dragging and dropping.
+    I was able to fix the resizer pruning bug by deferring the pruning until after all changes
+    have completed.  Pruning was an issue because it was pruning tiles before I had time to
+    re-insert a tile into them.  By deferring the pruning, I'm able to manipulate the tree
+    without worrying about pruning at all.
+
+  (fixed) Widgets rendering three times on startup.
+    The change/render system had some redundancy in it.  I was able to ferret out the
+    redundant calls to render, and fixed the problem.
+
+  (fixed) Dragging something off-screen causes the screen to scroll.
+    I was able to remedy the situation by setting the body position to fixed.  This
+    caused the body background to disappear until I set it to fixed as well.  What doesn't
+    make any sense is that the old dash didn't set the body to fixed positioning, yet it
+    still doesn't scroll when dragging.  Not sure why that is.
+
+
