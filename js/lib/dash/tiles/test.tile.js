@@ -31,7 +31,7 @@ define(['jQuery', 'Underscore', 'Backbone', 'Dash'],
     },
     
     link: function(ev) {
-      Dash.root.add({ 
+      Dash.root.addTile({ 
         type: 'menu',
         spawner: this,
         target: $(ev.target),

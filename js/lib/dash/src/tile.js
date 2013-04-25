@@ -144,7 +144,7 @@
      * @param {integer} index (insertion index / optional)
      * @param {object} extend (extend tile options / optional)
      */
-    add: function(tile, index, extend) {
+    addTile: function(tile, index, extend) {
       var tiles = undefined
         , that = this;
       
@@ -182,7 +182,7 @@
       if (this.parent) {
         var parent = this.parent;
         parent.beginChange();
-        parent.add(tile, this.parent.indexOf(this));
+        parent.addTile(tile, this.parent.indexOf(this));
         this.detach();
         parent.endChange();
       }
@@ -315,7 +315,7 @@
       while ((tile = this.tiles.pop())) {
         tile.close();
       }      
-      this.add(tiles);
+      this.addTile(tiles);
       this.endChange();
     },
     
@@ -628,7 +628,7 @@
      */
     bindTile: function(name, tile, index) {
       return this.bind(name, {
-        context: this.add(tile || name, index, this.get(name)),
+        context: this.addTile(tile || name, index, this.get(name)),
         set: 'set',
         get: '_getBoundTile',
         prime: false

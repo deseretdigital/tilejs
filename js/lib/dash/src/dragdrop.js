@@ -178,7 +178,7 @@
       }
       // Attach the tile to the root context
       if (_.isObject(tile)) {
-        tile = root.add(tile);
+        tile = root.addTile(tile);
         tile.set('position', 'offset');        
         this.tileX = tile.x;
         this.tileY = tile.y;

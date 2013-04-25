@@ -100,7 +100,6 @@ NOTES:
 			.close(delspawned) << formerly known as shutdown(), setting delspawned=true will delete spawned children when closing.
 		
 		Tile Management
-			.add(tile, index, defaults) << this is how you add tiles to the parent.  Should probably be called .addTile().
 			.detach() << detaches the tile from the parent
 			.replace(tile) << replaces this tile with another.  Will detach other tile before attaching it.
 			.find(cid) << recursively look for a tile by it's cid in the tree. For example, in the console type: Dash.root.find('view10');
@@ -115,6 +114,7 @@ NOTES:
 			.despawn(tile) << used by system to cut spawning ties
 
 		Child Management
+      .addTile(tile, index, defaults) << this is how you add tiles to the parent. 
 			.getTiles() << get all the children tiles. Used for serializing the child tiles.
 			.setTiles(tiles) << set all the children tiles. Used for de-serializing the child tiles.
 			.length() << get the number of child tiles

@@ -50,7 +50,7 @@ requirejs([
   
     Dash.root = new Root();
   
-    Dash.root.add([{ 
+    Dash.root.addTile([{ 
       type: 'dash/stacker',
       axis: 'vertical',
       position: 'screen',

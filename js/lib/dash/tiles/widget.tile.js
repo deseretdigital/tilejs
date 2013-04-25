@@ -68,7 +68,7 @@ define(['jQuery', 'Underscore', 'Backbone', 'Dash', 'tile!dash/stacker'],
         value ? this._focusOn() : this._focusOff();
         if (value && this.parent == Dash.root) {
           console.log("FOCUS");
-          Dash.root.add(this);
+          Dash.root.addTile(this);
         }
         this.focus = value;  
       }
@@ -137,7 +137,7 @@ define(['jQuery', 'Underscore', 'Backbone', 'Dash', 'tile!dash/stacker'],
     
     dragFinish: function(ev, dd) {
       if (dd.started && !dd.committed) {
-        dd.saved.parent.add(dd.saved.child, dd.saved.index);
+        dd.saved.parent.addTile(dd.saved.child, dd.saved.index);
       }
     },
     
@@ -217,9 +217,9 @@ define(['jQuery', 'Underscore', 'Backbone', 'Dash', 'tile!dash/stacker'],
       if (!axis || daxis != axis) {
         var tiles = [dd.tile];
         after ? tiles.unshift(this) : tiles.push(this);
-        this.parent.add({ type: this.parent.type, tiles: tiles}, index);
+        this.parent.addTile({ type: this.parent.type, tiles: tiles}, index);
       } else {
-        this.parent.add(dd.tile, index + (after ? 1 : 0));
+        this.parent.addTile(dd.tile, index + (after ? 1 : 0));
       }
       return true;
     },

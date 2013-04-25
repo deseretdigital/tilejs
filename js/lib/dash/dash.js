@@ -248,7 +248,7 @@ define(['jQuery', 'Underscore', 'Backbone'],
       }
       // Attach the tile to the root context
       if (_.isObject(tile)) {
-        tile = root.add(tile);
+        tile = root.addTile(tile);
         tile.set('position', 'offset');        
         this.tileX = tile.x;
         this.tileY = tile.y;
@@ -829,7 +829,7 @@ define(['jQuery', 'Underscore', 'Backbone'],
      * @param {integer} index (insertion index / optional)
      * @param {object} extend (extend tile options / optional)
      */
-    add: function(tile, index, extend) {
+    addTile: function(tile, index, extend) {
       var tiles = undefined
         , that = this;
       
@@ -867,7 +867,7 @@ define(['jQuery', 'Underscore', 'Backbone'],
       if (this.parent) {
         var parent = this.parent;
         parent.beginChange();
-        parent.add(tile, this.parent.indexOf(this));
+        parent.addTile(tile, this.parent.indexOf(this));
         this.detach();
         parent.endChange();
       }
@@ -1000,7 +1000,7 @@ define(['jQuery', 'Underscore', 'Backbone'],
       while ((tile = this.tiles.pop())) {
         tile.close();
       }      
-      this.add(tiles);
+      this.addTile(tiles);
       this.endChange();
     },
     
@@ -1313,7 +1313,7 @@ define(['jQuery', 'Underscore', 'Backbone'],
      */
     bindTile: function(name, tile, index) {
       return this.bind(name, {
-        context: this.add(tile || name, index, this.get(name)),
+        context: this.addTile(tile || name, index, this.get(name)),
         set: 'set',
         get: '_getBoundTile',
         prime: false

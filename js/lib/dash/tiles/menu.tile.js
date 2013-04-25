@@ -34,7 +34,7 @@ define(['jQuery', 'Underscore', 'Backbone', 'Dash'],
     link: function(ev) {
       var flyout = this.parent == Dash.root;
       
-      Dash.root.add({ 
+      Dash.root.addTile({ 
         type: 'menu',
         spawner: this,
         target: $(ev.target),
