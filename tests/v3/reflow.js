@@ -2,11 +2,6 @@
   //    Reflow Constants
   // -----------------------------------------------------------------------
 
-  // Reflow Reasons
-  REFLOW_NONE = 0;      
-  REFLOW_INIT = 1;        // Change Flag
-  REFLOW_CHANGE = 2;      // Change Flag
-  
   // Recursion Loop Detection
   REFLOW_DEPTH = 10;
   REFLOW_OVERFLOW = 10000;

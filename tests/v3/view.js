@@ -11,8 +11,8 @@
 
     // Reflow Parameters
     reflow: new Reflow(),       // Global reflow object
-    _change: REFLOW_NONE,       // Reflow change flag
-    _measure: REFLOW_NONE,      // Reflow measure flags
+    _change: 0,                 // Reflow change flag
+    _measure: 0,                // Reflow measure flags
 
     // Relationships
     parent: null,               // Parent view
@@ -60,15 +60,22 @@
     },
     
     // -----------------------------------------------------------------------
+    //    Layout Management
+    // -----------------------------------------------------------------------
+    
+    layout: function() {
+      
+    },
+    
+    // -----------------------------------------------------------------------
     //    Reflow Management
     // -----------------------------------------------------------------------
 
     // Flag a change reflow
-    change: function(flags) {
-      if (!this._change) {
+    change: function() {
+      if (!this._change++) {
         this.reflow.change.push(this);
       }
-      this._change |= flags;
     },
     
     // Changes reflow event
@@ -85,7 +92,9 @@
     
     bubble: function(views) {
       if (this.parent) {
-        this.parent.bubble(views ? views.push(this) : [this]);
+        if (views) views.push(this);
+        else views = [this];
+        this.parent.bubble(views);
       } else {
         
       }
@@ -105,7 +114,7 @@
     // Measure reflow event
     onMeasure: function() {
       this._styleSize = this.styleSize(this.el);
-      this.change(REFLOW_CHANGE);
+      this.change();
     },
     
     // -----------------------------------------------------------------------
@@ -114,6 +123,7 @@
     
     clearStyle: function() {
       this.$el.removeAttr('style');
+      //this.el.removeAttribute('style');
     },
     
     // get the style size
@@ -123,7 +133,7 @@
         var hash = this.styleHash();
         this._styleSize = this.style.size(hash, el);
         if (this._styleSize && this._measure) {
-          this._measure = REFLOW_NONE;
+          this._measure = 0;
         }
       }
       return this._styleSize;

@@ -44,17 +44,34 @@
     //    ROOT
     // -----------------------------------------------------------------------
     
-    var Root = View.extend();
+    var Root = View.extend({
+      
+      initChild: function(view) {
+        var style = view.el.style;
+        style.position = 'absolute';
+        style.display = 'block';
+        View.prototype.initChild.call(this, view);
+      }
+      
+    });
     
     // -----------------------------------------------------------------------
     //    Viewport
     // -----------------------------------------------------------------------
     
     var Viewport = View.extend({
+      
       className: 'viewport',
       
       layout: function() {
         
+      },
+      
+      initChild: function(view) {
+        var style = view.el.style;
+        style.position = 'static';
+        style.display = 'block';
+        View.prototype.initChild.call(this, view);
       }
       
     });
@@ -72,6 +89,13 @@
         for (var x = 0; x < this.rows; x++) {
           this.addView(new Row());
         }
+      },
+      
+      initChild: function(view) {
+        var style = view.el.style;
+        style.position = 'static';
+        style.display = 'block';
+        View.prototype.initChild.call(this, view);
       }
       
     });
@@ -92,6 +116,13 @@
             width: (width += 5)
           }));
         }
+      },
+      
+      initChild: function(view) {
+        var style = view.el.style;
+        style.position = 'absolute';
+        style.display = 'block';
+        View.prototype.initChild.call(this, view);
       },
       
       layout: function() {
