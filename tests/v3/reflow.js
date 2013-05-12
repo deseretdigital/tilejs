@@ -33,7 +33,7 @@
   //    Finish the reflow capture
   // -----------------------------------------------------------------------
   
-  Reflow.prototype.finish = function() {
+  Reflow.prototype.trigger = function() {
     if (!--this.count) this.dispatch();
   };
 
@@ -45,6 +45,8 @@
     var that = this;
     level || (level = 0);
     this.count = 0;
+
+console.log("Dispatch", "level:" + level, 'measure[' + this.measure.length + ']', 'change[' + this.change.length + ']');
 
     if (level >= REFLOW_DEPTH) {
       console.error('Reflow.disptach() recursion error');
@@ -74,7 +76,7 @@
     
     while ((view = this.change.shift())) {
       if (view._change) {
-        view.onChanges();
+        view.onChange();
         view._change = 0;
         if (count++ > REFLOW_OVERFLOW) {
           console.error('Reflow.change queue overflow');

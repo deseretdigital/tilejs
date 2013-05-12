@@ -56,7 +56,7 @@
     // Flag a change reflow
     change: function(flags) {
       if (!this._change) {
-        this.reflow._change.push(this);
+        this.reflow.change.push(this);
       }
       this._change |= flags;
     },
@@ -65,8 +65,10 @@
     onChange: function() {
       var size = this.styleSize();
       if (size) {
+        console.log("sizing_ok", this.className + '(' + size.width + 'x' + size.height + ')');
         // styling... do something!!!
       } else {
+        console.log("sizing_err");
         // no styling... defer???
       }
     },
@@ -75,16 +77,17 @@
     measure: function() {
       if (!this._measure++) {
         this._styleSize = this._styleHash = null;
-        this.reflow._measure.push(this);
+        this.reflow.measure.push(this);
         for (var i = 0, l = this.views.length; i < l; i++) {
-          this.views[i].flagMeasure();
+          this.views[i].measure();
         }
       }
     },
     
     // Measure reflow event
     onMeasure: function() {
-      this.styleSize(this.el);
+      this._styleSize = this.styleSize(this.el);
+      this.change(REFLOW_CHANGE);
     },
     
     // -----------------------------------------------------------------------

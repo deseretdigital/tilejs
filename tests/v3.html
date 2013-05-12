@@ -5,19 +5,18 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <style type="text/css">@import "../styles/reset.css";</style>
     <style type="text/css">
-      #canvas {
+      .viewport {
         border: 5px solid #000;
         width: 500px;
         height: 500px;
         overflow: auto;
       }
       .table {
-        position: relative;
       }
       .row { 
         border-top: 1px solid #999;
         height: 0;
-        position: absolute;
+        position: relative;
       }
       .cell {
         position: absolute;
@@ -42,10 +41,23 @@
     <script type="text/javascript">
       
     // -----------------------------------------------------------------------
-    rows = 200;
-    cols = 20;
-    renders = 2;
-    table = null;
+    //    ROOT
+    // -----------------------------------------------------------------------
+    
+    var Root = View.extend();
+    
+    // -----------------------------------------------------------------------
+    //    Viewport
+    // -----------------------------------------------------------------------
+    
+    var Viewport = View.extend({
+      className: 'viewport',
+      
+      layout: function() {
+        
+      }
+      
+    });
     
     // -----------------------------------------------------------------------
     //    TABLE
@@ -54,9 +66,10 @@
     var Table = View.extend({
     
       className: 'table',
+      rows: 10, //200,
       
       initialize: function() {
-        for (var x = 0; x < rows; x++) {
+        for (var x = 0; x < this.rows; x++) {
           this.addView(new Row());
         }
       }
@@ -70,18 +83,18 @@
     var Row = View.extend({
       
       className: 'row',
+      cells: 5, //20,
       
       initialize: function() {
         var width = 40;
-        for (var x = 0; x < cols; x++) {
+        for (var x = 0; x < this.cells; x++) {
           this.addView(new Cell({
-            width: width
+            width: (width += 5)
           }));
-          width += 5;
         }
       },
       
-      render: function() {
+      layout: function() {
         var views = this.views, height = 0, offset = 0;
           
         for (var c = 0, cl = views.length; c < cl; c++) {
@@ -132,6 +145,7 @@
     });
     
     // -----------------------------------------------------------------------
+    
     function resizeTable(tv) {
       var top = 0;
       console.time('resize_time'); 
@@ -158,15 +172,14 @@
     }
     
     // -----------------------------------------------------------------------
+    
     function update() {
-      var rval, cval, cell, frag, span, finish, box;
-      
       console.time('change_time');      
       
       for (var i = 0; i < 100; i++) {
-        rval = Math.floor(Math.random() * rows);
-        cval = Math.floor(Math.random() * cols);
-        cell = table.views[rval].views[cval];
+        var rval = Math.floor(Math.random() * rows);
+        var cval = Math.floor(Math.random() * cols);
+        var cell = table.views[rval].views[cval];
         cell.select();
         cell.increase('when in disgrace with fortune');
       }
@@ -176,18 +189,30 @@
     }
     
     // -----------------------------------------------------------------------
+    
     $(document).ready(function() {
       console.time('render_time');   
       
+      root = new Root({ el: $('body')[0] });
+      
+      root.reflow.capture();
+      
+      viewport = new Viewport();
+      root.addView(viewport);
+      
       table = new Table();
-      $('#canvas').append(table.el);
+      viewport.addView(table);
+      
+      root.reflow.trigger();
       
       console.timeEnd('render_time');
-      setTimeout(update, 3000);
+      
+      renders = 2;
+      //setTimeout(update, 3000);
     });
+    
     </script>
   </head>
   <body>
-    <div id="canvas"></div>
   </body>
 </html>
