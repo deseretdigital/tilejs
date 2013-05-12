@@ -1,51 +1,63 @@
   // -----------------------------------------------------------------------
-  //    Reflow Object
+  //    Reflow Constants
   // -----------------------------------------------------------------------
 
   // Reflow Reasons
   REFLOW_NONE = 0;      
-  REFLOW_INIT = 1;        // Content Flag
-  REFLOW_CONTENT = 2;     // Content Flag
+  REFLOW_INIT = 1;        // Change Flag
+  REFLOW_CHANGE = 2;      // Change Flag
   
-  // Infinite Recursion Detection
+  // Recursion Loop Detection
   REFLOW_DEPTH = 10;
   REFLOW_OVERFLOW = 10000;
 
-  // Reflow constructor
+  // -----------------------------------------------------------------------
+  //    Reflow constructor
+  // -----------------------------------------------------------------------
+
   Reflow = function() {
     this.count = 0;
-    this.content = [];
+    this.change = [];
     this.measure = [];
   };
-
-  // Start the reflow capture
+  
+  // -----------------------------------------------------------------------
+  //    Start the reflow capture
+  // -----------------------------------------------------------------------
+  
   Reflow.prototype.capture = function() {
     this.count++;
   };
 
-  // Finish the reflow capture
+  // -----------------------------------------------------------------------
+  //    Finish the reflow capture
+  // -----------------------------------------------------------------------
+  
   Reflow.prototype.finish = function() {
     if (!--this.count) this.dispatch();
   };
 
-  // Begin the dispatch process
+  // -----------------------------------------------------------------------
+  //    Begin the dispatch process
+  // -----------------------------------------------------------------------
+  
   Reflow.prototype.dispatch = function(level) {
     var that = this;
     level || (level = 0);
     this.count = 0;
 
     if (level >= REFLOW_DEPTH) {
-      console.error('Reflow disptach recursion error');
+      console.error('Reflow.disptach() recursion error');
       console.trace();
     } 
     else {
-      if (this.content.length) {
-        this.dispatchContent();
+      if (this.change.length) {
+        this.dispatchChanges();
       }
       if (this.measure.length) {
         _.defer(function() { 
           that.dispatchMeasure();
-        if (that.content.length) {
+        if (that.change.length) {
             that.dispatch(level + 1);
           }
         });
@@ -53,33 +65,39 @@
     }
   };
 
-  // Dispatch the content queue
-  Reflow.prototype.dispatchContent = function() {
+  // -----------------------------------------------------------------------
+  //    Dispatch the change queue
+  // -----------------------------------------------------------------------
+  
+  Reflow.prototype.dispatchChanges = function() {
     var view, count = 0;
     
-    while ((view = this.content.shift())) {
-      if (view.content) {
-        view.onContent();
-        view.content = 0;
+    while ((view = this.change.shift())) {
+      if (view._change) {
+        view.onChanges();
+        view._change = 0;
         if (count++ > REFLOW_OVERFLOW) {
-          console.error('Reflow content queue overflow');
+          console.error('Reflow.change queue overflow');
           console.trace();
         }
       }
     }
-    this.content = [];
+    this.change = [];
   };
 
-  // Dispatch the measure queue
+  // -----------------------------------------------------------------------
+  //    Dispatch the measure queue
+  // -----------------------------------------------------------------------
+  
   Reflow.prototype.dispatchMeasure = function() {
     var view, count = 0;
     
     while ((view = this.measure.shift())) {
-      if (view.measure) {
+      if (view._measure) {
         view.onMeasure();
-        view.measure = 0;
+        view._measure = 0;
         if (count++ > REFLOW_OVERFLOW) {
-          console.error('Reflow measure queue overflow');
+          console.error('Reflow.measure queue overflow');
           console.trace();
         }
       }

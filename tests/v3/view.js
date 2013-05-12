@@ -11,8 +11,8 @@
 
     // Reflow Parameters
     reflow: new Reflow(),       // Global reflow object
-    content: REFLOW_NONE,       // Content event flags
-    measure: REFLOW_NONE,       // Measure event flags
+    _change: REFLOW_NONE,       // Reflow change flag
+    _measure: REFLOW_NONE,      // Reflow measure flags
 
     // Relationships
     parent: null,               // Parent view
@@ -46,23 +46,23 @@
       view.parent = this;
       this.views.push(view);
       this.el.appendChild(view.el);
-      view.flagMeasure();
+      view.measure();
     },
     
     // -----------------------------------------------------------------------
     //    Reflow Management
     // -----------------------------------------------------------------------
 
-    // Flag a content reflow
-    flagContent: function(flags) {
-      if (!this.content) {
-        this.reflow.content.push(this);
+    // Flag a change reflow
+    change: function(flags) {
+      if (!this._change) {
+        this.reflow._change.push(this);
       }
-      this.content |= flags;
+      this._change |= flags;
     },
     
-    // Content reflow event
-    onContent: function() {
+    // Changes reflow event
+    onChange: function() {
       var size = this.styleSize();
       if (size) {
         // styling... do something!!!
@@ -72,10 +72,10 @@
     },
     
     // Flag for measurement
-    flagMeasure: function() {
-      if (!this.measure++) {
+    measure: function() {
+      if (!this._measure++) {
         this._styleSize = this._styleHash = null;
-        this.reflow.measure.push(this);
+        this.reflow._measure.push(this);
         for (var i = 0, l = this.views.length; i < l; i++) {
           this.views[i].flagMeasure();
         }
@@ -84,10 +84,7 @@
     
     // Measure reflow event
     onMeasure: function() {
-      var size = this.styleSize();
-      if (!size) {
-        
-      } 
+      this.styleSize(this.el);
     },
     
     // -----------------------------------------------------------------------
@@ -99,13 +96,13 @@
     },
     
     // get the style size
-    // @force {boolean} true to force sizing
-    styleSize: function(force) {
+    // @el {dom_element} (optional) forces sizing if not cached
+    styleSize: function(el) {
       if (!this._styleSize) {
         var hash = this.styleHash();
-        this._styleSize = this.style.size(hash, force ? this.el : null);
-        if (this._styleSize && this.measure) {
-          this.measure = REFLOW_NONE;
+        this._styleSize = this.style.size(hash, el);
+        if (this._styleSize && this._measure) {
+          this._measure = REFLOW_NONE;
         }
       }
       return this._styleSize;
