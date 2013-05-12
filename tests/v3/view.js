@@ -43,10 +43,20 @@
 
     // Add a child view
     addView: function(view) {
-      view.parent = this;
+      this.initChild(view);
+      view.initParent(this);
+    },
+    
+    // initialize the child
+    initChild: function(view) {
       this.views.push(view);
       this.el.appendChild(view.el);
-      view.measure();
+    },
+    
+    // initialize the parent
+    initParent: function(view) {
+      this.parent = view;
+      this.measure();
     },
     
     // -----------------------------------------------------------------------
@@ -65,11 +75,19 @@
     onChange: function() {
       var size = this.styleSize();
       if (size) {
-        console.log("sizing_ok", this.className + '(' + size.width + 'x' + size.height + ')');
+        this.bubble();
+        //console.log("sizing_ok", this.className + '(' + size.width + 'x' + size.height + ')');
         // styling... do something!!!
       } else {
         console.log("sizing_err");
-        // no styling... defer???
+      }
+    },
+    
+    bubble: function(views) {
+      if (this.parent) {
+        this.parent.bubble(views ? views.push(this) : [this]);
+      } else {
+        
       }
     },
     
