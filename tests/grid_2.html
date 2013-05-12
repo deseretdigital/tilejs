@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <style type="text/css">@import "../styles/reset.css";</style>
+    <style type="text/css">
+     .main { 
+       border: 1px solid #000;
+       padding: 10px;
+       width: 500px;
+       height: 400px;
+       overflow: auto;
+     }
+     .row { 
+     }
+     .cell {
+       border-bottom: 1px solid #999;
+       border-right: 1px dotted #999;
+       padding: 2px;
+       width: 60px;
+     }
+     .selected {
+       background-color: #900;
+       color: #fff;
+     }
+    </style>
+    <script type="text/javascript" src="../js/lib/jquery/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../js/lib/underscore/underscore.1.4.4.js"></script>    
+    <script type="text/javascript" src="../js/lib/backbone/backbone-dev.1.0.0.js"></script>
+    <script type="text/javascript">
+      
+    // -----------------------------------------------------------------------
+    rows = 200;
+    cols = 20;
+    renders = 5;
+    
+    // -----------------------------------------------------------------------
+    View = Backbone.View.extend({
+      _change: false,
+      _changed: [],
+      _width: 0,
+      _height: 0,
+      views: null,
+      initialize: function() {
+        this.views = [];
+        this.change();
+      },
+      _ensureElement: function() {
+        this.el = document.createElement(this.tagName);
+        this.el.className = this.className;
+        this.setElement(this.el, false);
+      },
+      addView: function(view) {
+        this.views.push(view);
+        this.el.appendChild(view.el);
+      },
+      pluck: function() {
+        var el = this.el
+          , parent = el.parentNode
+          , next = el.nextSibling;
+        parent.removeChild(el);
+        return function() {
+          next ? parent.insertBefore(el, next) : parent.appendChild(el);
+        };
+      },
+      change: function() {
+        var that = this;
+        
+        if (!this._change) {
+          if (!this._changed.length) {
+            _.defer(function() {
+
+              console.time('measure_time'); 
+              //var oh = table.el.offsetHeight;
+              //var ow = table.el.offsetWidth;
+
+           //   console.log("MEASURING", that._changed.length);
+              for (var i = 0, l = that._changed.length; i < l; i++) {
+                var v = that._changed.pop();
+                //v._width = v.$el.width();
+                //v._height = v.$el.height();                
+             //   v._width = v.el.offsetWidth; 
+                v._height = v.el.offsetHeight;
+                v._change = false;
+              }
+              console.timeEnd('measure_time');
+            });
+          }
+          this._changed.push(this);
+          this._change = true;
+        }
+      }
+    });
+    
+    // -----------------------------------------------------------------------
+    function row() {
+      var row = new View({ className: 'row', tagName: 'tr' });
+      for (var x = 0; x < cols; x++) {
+        var view = new View({ className: 'cell', tagName: 'td' });
+        view.el.appendChild(document.createTextNode(x));
+        row.addView(view);
+      }
+      return row;
+    }
+    
+    // -----------------------------------------------------------------------
+    function render() {
+      console.time('render_time');   
+      
+      table = new View({ tagName: 'table' });
+      for (var x = 0; x < rows; x++) {
+        table.addView(row(x));
+      }
+      $('body')[0].appendChild(table.el);
+      
+      console.timeEnd('render_time');
+    }
+
+    // -----------------------------------------------------------------------
+    function update() {
+      var rval, cval, cell, frag, span, finish;
+      
+      console.time('change_time');      
+      
+      finish = table.pluck();
+      
+      for (var i = 0; i < 100; i++) {
+        rval = Math.floor(Math.random() * rows);
+        cval = Math.floor(Math.random() * cols);
+        cell = table.views[rval].views[cval];
+
+        //finish = cell.pluck();
+
+        cell.$el[0].className = 'cell selected';
+        
+        //frag = document.createDocumentFragment();
+        span = document.createElement('span');
+        span.innerHTML = 'a';
+        cell.el.appendChild(span);
+        span = document.createElement('span');
+        span.innerHTML = 'b';
+        cell.el.appendChild(span);
+        span = document.createElement('span');
+        span.innerHTML = 'a son of samuel';
+        cell.el.appendChild(span);
+        
+        cell.change();
+        //cell.el.appendChild(frag);
+        
+        //var w = cell.el.offsetWidth;
+        //var h = cell.el.offsetHeight;
+        //cell.$el.height();
+        //cell.$el.width();
+        
+        //cell.$el.html('<span>a</span><span>b</span><span>c</span>');
+        //cell.$el.append('<span>a</span>');
+        //cell.$el.append('<span>b</span>');
+        //cell.$el.append('<span>c</span>');
+        
+        //finish();
+      }
+
+      finish();
+      
+      console.timeEnd('change_time');
+      
+      if (renders--) setTimeout(update, 1000);
+    }
+    
+    // -----------------------------------------------------------------------
+    function measure() {
+      
+    }
+
+    // -----------------------------------------------------------------------
+    $(document).ready(function() {
+      render();
+      update();
+    });
+    </script>
+  </head>
+  <body>
+  </body>
+</html>

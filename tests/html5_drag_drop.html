@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <style type="text/css">@import "../styles/reset.css";</style>
+    <style type="text/css">
+      .box {
+        border: 1px solid #000;
+        padding: 20px;
+        background-color: #ddd;
+        text-align: center;
+        width: 100px;
+        height: 100px;
+        margin: 10px;
+      }
+      .box div {
+        border: 1px solid #000;
+        padding: 10px;
+        background-color: #fff;
+      }
+      #mover {
+        border: 1px solid #000;
+        background-color: #fff;
+        padding: 10px;
+        width: 200px;
+      }
+    </style>
+    <script type="text/javascript" src="../js/lib/jquery/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../js/lib/underscore/underscore.1.4.4.js"></script>    
+    <script type="text/javascript" src="../js/lib/backbone/backbone.1.0.0.js"></script>
+    <script type="text/javascript">
+    function onDragStart(e) {
+     // console.log(e);
+     // e.preventDefault();
+     // return false;
+      console.log($(e.target).data('value'), "dragStart");
+      e.dataTransfer.setData('text/plain', 'this is the test data');
+    //  e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setDragImage(document.getElementById('mover'), 0, 0);
+   //   $(e.target).css('display', 'none');
+    }
+    function onDrag(e) {
+      console.log($(e.target).data('value'), "drag");
+    }
+    function onDragEnter(e) {
+      //e.dataTransfer.effectAllowed = 'copy';
+      console.log($(e.target).data('value'), "dragEnter");
+      $(e.target).css('backgroundColor', '#900');
+    }
+    function onDragLeave(e) {
+      console.log($(e.target).data('value'), "dragLeave");
+      $(e.target).css('backgroundColor', '#eee');
+    }
+    function onDragOver(e) {
+      console.log($(e.target).data('value'), "dragOver");
+   //   if (e.preventDefault) e.preventDefault();
+   //   e.dataTransfer.dropEffect = 'move'; 
+    }
+    function onDrop(e) {
+      console.log($(e.target).data('value'), "drop");
+    }
+    function onDragEnd(e) {
+      console.log($(e.target).data('value'), "dragEnd");
+      $(e.target).show();
+    }
+      
+    $(document).ready(function() {
+      var count = 1;
+      var boxes = document.querySelectorAll('.box');
+      [].forEach.call(boxes, function(box) {
+        box.addEventListener('dragstart', onDragStart, false);
+        box.addEventListener('drag', onDrag, false);
+        box.addEventListener('dragenter', onDragEnter, false);
+        box.addEventListener('dragleave', onDragLeave, false);
+        box.addEventListener('dragover', onDragOver, false);
+        box.addEventListener('drop', onDrop, false);
+        box.addEventListener('dragend', onDragEnd, false);        
+        $(box).data('value', count++);
+      });
+    });
+    </script>
+  </head>
+  <body>
+    <div class="box" style="position: absolute; top: 200px; left: 50px;" draggable="true">Box #1</div>
+    
+    <div class="box" draggable="true"><div>Box #1</div></div>
+    <div class="box" draggable="true">Box #2</div>
+    <div class="box" draggable="true">Box #3</div>
+    <div class="box" draggable="true">Box #4</div>
+    <div class="box" draggable="true">Box #5</div>
+    <div class="box" draggable="true">Box #6</div>   
+    <div id="mover">THIS IS THE MOVER</div>
+  </body>
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <style type="text/css">@import "../styles/reset.css";</style>
+    <style type="text/css">
+      #canvas {
+        border: 5px solid #000;
+        width: 500px;
+        height: 500px;
+        overflow: auto;
+      }
+      .table {
+        position: relative;
+      }
+      .row { 
+        border-top: 1px solid #999;
+        height: 0;
+        position: absolute;
+      }
+      .cell {
+        position: absolute;
+        top: 0px;
+        bottom: 0px;
+        border-right: 1px dotted #999;
+        padding: 2px;
+        width: 60px;
+        background: #fff;
+      }
+      .selected {
+        background-color: #900;
+        color: #fff;
+      }
+    </style>
+    <script type="text/javascript" src="../js/lib/jquery/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../js/lib/underscore/underscore.1.4.4.js"></script>    
+    <script type="text/javascript" src="../js/lib/backbone/backbone-dev.1.0.0.js"></script>
+    <script type="text/javascript">
+      
+    // -----------------------------------------------------------------------
+    rows = 200;
+    cols = 20;
+    renders = 5;
+    table = null;
+    stylemap = {};
+    
+    // -----------------------------------------------------------------------
+    //    Helper Function
+    // -----------------------------------------------------------------------
+    
+    function _pad(el, hor) {
+      var style = document.defaultView.getComputedStyle(el, '');
+      return (
+          parseInt(style.getPropertyValue(hor ? 'margin-left' : 'margin-top'), 10) 
+        + parseInt(style.getPropertyValue(hor ? 'margin-right' : 'margin-bottom', 10))
+        + parseInt(style.getPropertyValue(hor ? 'border-left' : 'border-top', 10))
+        + parseInt(style.getPropertyValue(hor ? 'border-right' : 'border-bottom', 10))
+        + parseInt(style.getPropertyValue(hor ? 'padding-left' : 'padding-top', 10))
+        + parseInt(style.getPropertyValue(hor ? 'padding-right' : 'padding-bottom', 10))
+      );
+    }
+    
+    function pad(view) {
+      /*
+      return {
+        width: view.$el.outerWidth(true) - view.$el.width(),
+        height: view.$el.outerHeight(true) - view.$el.height()
+      };
+      */
+      return {
+        height: _pad(view.el),
+        width: _pad(view.el, true)
+      };
+    }
+    
+    // -----------------------------------------------------------------------
+    View = Backbone.View.extend({
+      _change: false,
+      _changed: [],
+      _width: 0,
+      _height: 0,
+      _pads: null,
+      _ident: '',
+      _stylepath: '',
+      parent: null,
+      views: null,
+      initialize: function() {
+        this.views = [];
+        this.change();
+      },
+      _ensureElement: function() {
+        this.el = document.createElement(this.tagName);
+        this.el.className = this.className;
+        this.setElement(this.el, false);
+        this._ident = (this.el.tagName + ':' + this.el.className);
+      },
+      addView: function(view) {
+        view.parent = this;
+        this.views.push(view);
+        this.el.appendChild(view.el);
+      },
+      change: function() {
+        var that = this;
+        
+        if (!this._change) {
+          if (!this._changed.length) {
+            _.defer(function() {
+
+              bubblecount = 0;
+              console.time('measure_time_here'); 
+              for (var i = 0, l = that._changed.length; i < l; i++) {
+                var v = that._changed.pop();
+                var path = [];
+                v._height = v.el.firstChild.offsetHeight;
+                v._width = v.el.firstChild.offsetWidth;
+                
+                var style = v.bubble(path);
+                var pads = stylemap[style];
+                if (!pads) stylemap[style] = pads = pad(v); //v.calcpad(); //pad(v);
+                v._pads = pads;
+               
+                v._change = false;
+              }
+              console.timeEnd('measure_time_here');
+              console.log(bubblecount);
+              console.log(stylemap);
+              if (table) resizeTable(table.views);
+            });
+          }
+          this._changed.push(this);
+          this._change = true;
+        }
+      },
+      bubble: function(path) {
+        var style = '';
+        path.push(this);
+        bubblecount++;
+        if (this.parent) {
+          style = this.parent.bubble(path);
+        }
+        return (style + this._ident);
+      },
+      increase: function(val) {
+        var span = document.createElement('span');
+        span.innerHTML = val;
+        this.el.firstChild.appendChild(span);
+        this.change();
+      },
+      select: function() {
+        this.el.className = 'cell selected';  
+      },
+      calcpad: function(child) {
+        var el = document.createElement(this.tagName);
+        el.className = this.className;
+        if (child) el.appendChild(child);
+        if (this.parent) return this.parent.calcpad(el);
+        el.style.position = 'absolute';
+        el.style.zIndex = '-1000';
+        el.style.visibility = 'hidden';
+        document.body.appendChild(el);
+        var size = {
+          height: _pad(el),
+          width: _pad(el, true)
+        };
+        document.body.removeChild(el);
+        return size;
+      },
+      calculatePad: function() {
+        walkcount++;
+        if (!this._stylepath) {
+          if (this.parent) {
+            this._stylepath = this.parent._stylepath + this.tagName + this.className;
+          } else {
+            this._stylepath = this.tagName + this.className;
+          }
+          var pads = stylemap[this._stylepath];
+          if (!pads) stylemap[this._stylepath] = pads = this.calcpad();
+          this._pads = pads;
+        }
+        
+        var views = this.views;
+        for (var i = 0, l = views.length; i < l; i++) {
+          var view = views[i];
+          view.calculatePad();
+        }
+      }
+    });
+    
+    // -----------------------------------------------------------------------
+    function resizeTable(tv) {
+      var top = 0;
+      console.time('resize_time'); 
+      for (var r = 0, rl = tv.length; r < rl; r++) {
+        var row = tv[r]
+          , rv = row.views
+          , rmax = 0
+          , rlen = 0;
+        for (var c = 0, cl = rv.length; c < cl; c++) {
+          var cell = rv[c];
+          if (cell._height > rmax) rmax = cell._height;
+          rlen += cell._width + 5;
+        }
+        var style = row.el.style;
+        style.height = rmax + 'px';
+        style.width = rlen + 'px';
+        style.top = top + 'px';
+        top += rmax;
+      }
+      console.timeEnd('resize_time'); 
+    }
+    
+    // -----------------------------------------------------------------------
+    function row() {
+      var row = new View({ className: 'row' });
+      for (var x = 0; x < cols; x++) {
+        var view = new View({ className: 'cell' });
+        var contain = document.createElement('div');
+        contain.appendChild(document.createTextNode(x));
+        view.el.appendChild(contain);
+        view.el.style.left = (x * 65) + 'px';
+        view.el.style.width = '60px';
+        row.addView(view);
+      }
+      return row;
+    }
+    
+    // -----------------------------------------------------------------------
+    function render() {
+      console.time('render_time');   
+      
+      table = new View({ className: 'table' });
+      for (var x = 0; x < rows; x++) {
+        table.addView(row(x));
+      }
+      console.timeEnd('render_time');
+      /*
+
+      walkcount = 0;
+      console.time('calculate_padding');
+      
+      table.calculatePad();
+      
+      console.timeEnd('calculate_padding');
+      console.log("walk_count", walkcount);
+      */
+       $('#canvas')[0].appendChild(table.el);
+    }
+
+    // -----------------------------------------------------------------------
+    function update() {
+      var rval, cval, cell, frag, span, finish, box;
+      
+      console.time('change_time');      
+      
+      for (var i = 0; i < 200; i++) {
+        rval = Math.floor(Math.random() * rows);
+        cval = Math.floor(Math.random() * cols);
+        cell = table.views[rval].views[cval];
+        cell.select();
+        cell.increase('when in disgrace with fortune');
+      }
+      console.timeEnd('change_time');
+      
+      if (renders--) setTimeout(update, 1000);
+    }
+    
+    // -----------------------------------------------------------------------
+    $(document).ready(function() {
+      render();
+      setTimeout(update, 2000);
+    });
+    </script>
+  </head>
+  <body>
+    <div id="canvas"></div>
+  </body>
+</html>

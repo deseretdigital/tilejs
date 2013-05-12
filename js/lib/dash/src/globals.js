@@ -7,7 +7,10 @@
   
     Dash = window.Dash = { 
       Tiles: {},
-      root: null
+      root: null,
+      Loader: null,
+      Error: null,
+      Dragger: null
     },
   
     // Abreviated System Helpers

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <style type="text/css">@import "../styles/reset.css";</style>
+    <style type="text/css">
+      #canvas {
+        border: 5px solid #000;
+        width: 500px;
+        height: 500px;
+        overflow: auto;
+      }
+      .table {
+        position: relative;
+      }
+      .row { 
+        border-top: 1px solid #999;
+        height: 0;
+        position: absolute;
+      }
+      .cell {
+        position: absolute;
+        top: 0px;
+        bottom: 0px;
+        border-right: 1px dotted #999;
+        padding: 2px;
+        width: 60px;
+        background: #fff;
+      }
+      .selected {
+        background-color: #900;
+        color: #fff;
+      }
+    </style>
+    <script type="text/javascript" src="../js/lib/jquery/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../js/lib/underscore/underscore.1.4.4.js"></script>    
+    <script type="text/javascript" src="../js/lib/backbone/backbone-dev.1.0.0.js"></script>
+    <script type="text/javascript" src="v3/style.js"></script>        
+    <script type="text/javascript" src="v3/reflow.js"></script>
+    <script type="text/javascript" src="v3/view.js"></script>    
+    <script type="text/javascript">
+      
+    // -----------------------------------------------------------------------
+    rows = 200;
+    cols = 20;
+    renders = 2;
+    table = null;
+    
+    // -----------------------------------------------------------------------
+    //    TABLE
+    // -----------------------------------------------------------------------
+    
+    var Table = View.extend({
+    
+      className: 'table',
+      
+      initialize: function() {
+        for (var x = 0; x < rows; x++) {
+          this.addView(new Row());
+        }
+      }
+      
+    });
+    
+    // -----------------------------------------------------------------------
+    //    ROW
+    // -----------------------------------------------------------------------
+    
+    var Row = View.extend({
+      
+      className: 'row',
+      
+      initialize: function() {
+        var width = 40;
+        for (var x = 0; x < cols; x++) {
+          this.addView(new Cell({
+            width: width
+          }));
+          width += 5;
+        }
+      },
+      
+      render: function() {
+        var views = this.views, height = 0, offset = 0;
+          
+        for (var c = 0, cl = views.length; c < cl; c++) {
+          var cell = views[c];
+          cell.el.style.left = offset + 'px';
+          cell.el.style.width = (cell.width - cell._wpad) + 'px';
+          if (cell._height > height) height = cell._height;
+          offset += cell.width;
+        }
+        var style = this.el.style;
+        style.height = height + 'px';
+        style.width = offset + 'px';
+      }
+      
+    });
+    
+    // -----------------------------------------------------------------------
+    //    CELL
+    // -----------------------------------------------------------------------
+    
+    var Cell = View.extend({
+      
+      className: 'cell',
+      width: 60,
+      
+      initialize: function(options) {
+        this.width = options.width;
+      },
+      
+      render: function() {
+        this.el.appendChild(document.createTextNode('test'));
+        this.el.style.left = 0 + 'px';
+        this.el.style.width = this.width + 'px';
+        return this;
+      },
+      
+      increase: function(val) {
+        var span = document.createElement('span');
+        span.innerHTML = val;
+        this.el.appendChild(span);
+        this.change();
+      },
+      
+      select: function() {
+        this.el.className = 'cell selected';  
+      }
+      
+    });
+    
+    // -----------------------------------------------------------------------
+    function resizeTable(tv) {
+      var top = 0;
+      console.time('resize_time'); 
+      for (var r = 0, rl = tv.length; r < rl; r++) {
+        var row = tv[r]
+          , rv = row.views
+          , rmax = 0
+          , rlen = 0;
+          
+        for (var c = 0, cl = rv.length; c < cl; c++) {
+          var cell = rv[c];
+          cell.el.style.left = rlen + 'px';
+          cell.el.style.width = (cell.width - cell._wpad) + 'px';
+          if (cell._height > rmax) rmax = cell._height;
+          rlen += cell.width;
+        }
+        var style = row.el.style;
+        style.height = rmax + 'px';
+        style.width = rlen + 'px';
+        style.top = top + 'px';
+        top += rmax;
+      }
+      console.timeEnd('resize_time'); 
+    }
+    
+    // -----------------------------------------------------------------------
+    function update() {
+      var rval, cval, cell, frag, span, finish, box;
+      
+      console.time('change_time');      
+      
+      for (var i = 0; i < 100; i++) {
+        rval = Math.floor(Math.random() * rows);
+        cval = Math.floor(Math.random() * cols);
+        cell = table.views[rval].views[cval];
+        cell.select();
+        cell.increase('when in disgrace with fortune');
+      }
+      console.timeEnd('change_time');
+      
+      if (renders--) setTimeout(update, 1000);
+    }
+    
+    // -----------------------------------------------------------------------
+    $(document).ready(function() {
+      console.time('render_time');   
+      
+      table = new Table();
+      $('#canvas').append(table.el);
+      
+      console.timeEnd('render_time');
+      setTimeout(update, 3000);
+    });
+    </script>
+  </head>
+  <body>
+    <div id="canvas"></div>
+  </body>
+</html>

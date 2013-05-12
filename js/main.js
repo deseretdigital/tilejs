@@ -42,6 +42,7 @@ requirejs([
   'tile!dash/slider',
   'tile!dash/spacer',
   'tile!dash/stacker',
+  'tile!dash/lister',
   'tile!dash/header',
   'tile!dash/menu',
   'tile!dash/test',
@@ -69,14 +70,17 @@ requirejs([
               { type: 'dash/widget' }, 
             ]},
             { tiles: [
-              { type: 'dash/widget' }, 
               { tiles: [
                 { type: 'dash/widget' }, 
                 { type: 'dash/widget' },
               ]}, 
               { type: 'dash/test2' }, 
-              { type: 'dash/test2' },
-              { type: 'dash/test2' }
+              { type: 'dash/lister', tiles: [
+                  { type: 'app/cell', title: 'item #1' }, 
+                  { type: 'app/cell', title: 'item #2' }, 
+                  { type: 'app/cell', title: 'item #3' }
+                ]
+              }
             ]}
         ]}
       ]

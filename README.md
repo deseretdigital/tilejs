@@ -120,28 +120,10 @@ NOTES:
 			.length() << get the number of child tiles
 			.atIndex(index) << get the child at the specified index
 			.indexOf(tile) << get the index of the child at the specified index
-			.captureGeometry($el) << called before detaching from parent to capture it's geometry. Used when dragging.
 			.parentInit(parent) << (OVERRIDE) called when being attached to a parent to allow binding or other parent initialization.
 			.childInit(child) << (OVERRIDE) called when attaching a child to a parent to allow binding or other child initiailziation.
 			.closeChild(child) << (OVERRIDE) called when detaching a child from a parent to allow for unbiding or other child shutdown.
-		
-		Drag Handlers
-			.setDrag(state) << (OVERRIDE) enable the tile to be dragged.  All this does is add a .drag class to the tile.  The root tile takes care of the rest.
-			.dragInit(ev, dd) << (OVERRIDE) called when initializing a drag. return true to capture the drag or false to pass event to parent tile.
-			.dragStart(ev, dd) << (OVERRIDE) called when tile is starting to be dragged, i.e. has moved a pixel.  Use to set initial conditions within dd object.
-			.dragMove(ev, dd) << (OVERRIDE) called when tile is being dragged.
-			.dragEnd(ev, dd) << (OVERRIDE) called when tile is done being dragged. Only called if dragStart was called.
-			.dragFinish(ev, dd) << (OVERRIDE) called when tile is totally finished with drag. Clean-up anything set-up within dragInit.
 	
-		Drop Handlers
-			.setDrop(state) << (OVERRIDE) enable the tile to be dropped into. All this does is add a .drop class to the tile.  The root tile takes care of the rest.
-			.dropInit(ev, dd) << (OVERRIDE) called when a drag is starting to check to see if this is a dropzone.  Return true if it is a dropzone.
-			.dropOver(ev, dd) << (OVERRIDE) called when a drag enters the dropzone.
-			.dropMove(ev, dd) << (OVERRIDE) called when a drag moves within the dropzone.
-			.dropOut(ev, dd) << (OVERRIDE) called when a drag leaves the dropzone.
-			.dropCommit(ev, dd) << (OVERRIDE) called to test whether the dropzone accepted the drop.  Return true to accept, false to reject.
-			.dropFinish(ev, dd) << (OVERRIDE) called to clean-up anything set-up within dropInit.
-
 		Options API
 			.bind(name, params) << this is how you bind an option to the tile. Params is a configuration object
 			.unbind(name, buffer) << this is how you unbind an option from the tile. Buffer is a boolen that specifies whether to save values to buffer.
@@ -161,15 +143,33 @@ NOTES:
 			.deferChange(fn) << used by resizer tiles to defer self-closing to end of all changes but before reflow.
 			.bubble(tile, child) << system call made after all changes but before reflow rendering to determine top relfow nodes in the tree.
 			.render() << (OVERRIDE) default render code for a nested to to resize its children.  Subclasses should override this! Will be wrapped by tile constructor!
-			.renderTile(tile, css) << set the css on a child tile and trigger child to re-render. Called during a reflow.
 			.rendered() << will be automatically called after render() because it has been wrapped.  Clears the reflow change flags.
+			.renderTile(tile, css) << set the css on a child tile and trigger child to re-render. Called during a reflow.
 			
-		DOM Manipulation
+		DOM Interaction
 			.clearCSS() << clear the local css styles.  Called when a child is attached to a new parent.
 			.getWidth() << get the width of the tile.  Will use local value to prevent browser DOM reflow if present.
 			.getHeight() << get the height of the tile.  Will use local value to prevent browser DOM reflow if present.
 			.getPad() << get the element padding + border + margin.  Used by the system to adjust sizing for tiles styled by classes.
-			
+			.captureGeometry($el) << called before detaching from parent to capture it's geometry. Used when dragging.
+	
+		Drag Events
+			.setDrag(state) << (OVERRIDE) enable the tile to be dragged.  All this does is add a .drag class to the tile.  The root tile takes care of the rest.
+			.dragInit(ev, dd) << (OVERRIDE) called when initializing a drag. return true to capture the drag or false to pass event to parent tile.
+			.dragStart(ev, dd) << (OVERRIDE) called when tile is starting to be dragged, i.e. has moved a pixel.  Use to set initial conditions within dd object.
+			.dragMove(ev, dd) << (OVERRIDE) called when tile is being dragged.
+			.dragEnd(ev, dd) << (OVERRIDE) called when tile is done being dragged. Only called if dragStart was called.
+			.dragFinish(ev, dd) << (OVERRIDE) called when tile is totally finished with drag. Clean-up anything set-up within dragInit.
+	
+		Drop Events
+			.setDrop(state) << (OVERRIDE) enable the tile to be dropped into. All this does is add a .drop class to the tile.  The root tile takes care of the rest.
+			.dropInit(ev, dd) << (OVERRIDE) called when a drag is starting to check to see if this is a dropzone.  Return true if it is a dropzone.
+			.dropOver(ev, dd) << (OVERRIDE) called when a drag enters the dropzone. (DRAGENTER)
+			.dropMove(ev, dd) << (OVERRIDE) called when a drag moves within the dropzone. (DRAGOVER)
+			.dropOut(ev, dd) << (OVERRIDE) called when a drag leaves the dropzone. (DRAGLEAVE)
+			.dropCommit(ev, dd) << (OVERRIDE) called to test whether the dropzone accepted the drop.  Return true to accept, false to reject. (DROP)
+			.dropFinish(ev, dd) << (OVERRIDE) called to clean-up anything set-up within dropInit.
+
 		Clickout Events
 			.setClickout(state) << Enable the custom clickout event. True = enable clickout event. False = disable clickout event.
 			.isClickIn() << System call used by clickout to determine if a click within this tile will trigger a clickout event in the tree.
@@ -286,3 +286,108 @@ NOTES:
 		Email: abunker@deseretdigital.com
 		
 
+---------------------------------------------------------------------------------------
+
+  Experimental Results
+
+  1. Measuring after each update degrades performance by 10x.
+  2. Using raw DOM operations over jquery append improves performance 4x.
+  3. Using one .html() over .append improves performance 3x.
+
+---------------------------------------------------------------------------------------
+
+  Drag & Drop Browser Support 
+    http://caniuse.com/dragndrop
+
+  Backbone.js Performance Analysis
+    http://stackoverflow.com/questions/11744634/lots-of-backbone-views-performance-issues
+    http://stackoverflow.com/questions/7147711/backbone-js-performance-problems-too-many-views/7150279#7150279
+
+    http://danielarandaochoa.com/backboneexamples/blog/category/performance/
+
+    - Touching the DOM is expensive.
+    - When creating many views, think about how many times you have to touch the DOM.
+    http://www.sophomoredev.com/2012/06/a-different-approach-to-rendering-backbone-sub-views/
+    
+    - when you're dealing with large numbers of DOM elements, you absolutely don't want to have an individual View for each element. 
+    - At the other extreme, you don't want to have a single View for your entire application. Find a balance that makes sense, and represents a logical chunk of UI.
+    - Especially in older browsers, where performance matters most.
+    - setting a single innerHTML call with a bunch of HTML is far cheaper than doing the equivalent number of DOM-twiddling operations.
+    https://news.ycombinator.com/item?id=4111894
+
+    - Another common problem that is often visible with large collections is that on update or change, we render a view for every single model in the collection. 
+    - While this is sometimes necessary, it can lead to severe performance issues and adversely affect UI responsiveness. Especially on old computers and mobile devices.
+    - The reason for this is that every .append() we do in the render function causes the DOM to reflow - meaning that the browser has to recalculate the position and size of every element in the DOM tree.
+    http://ozkatz.github.io/avoiding-common-backbonejs-pitfalls.html
+
+    - Manipulating the dom is slow, it triggers a reflow of the page, this is costly even on small lists, specially on mobile.
+    http://backbonefu.com/2012/01/optimizing-the-views-list-creation-with-document-fragment/
+
+    - EXCELLENT TIPS!
+    https://developers.google.com/speed/articles/javascript-dom
+
+    - ABOUT REFLOW
+    https://developer.mozilla.org/en-US/docs/Notes_on_HTML_Reflow
+
+    - THE MOZILLA XUL BOX MODEL (exactly like tiles!)
+    https://developer.mozilla.org/en-US/docs/XUL/Tutorial/The_Box_Model
+    http://mb.eschew.org/2
+    https://developer.mozilla.org/en-US/docs/Introduction_to_Layout_in_Mozilla
+
+    - The Andriod layout model
+    - (note) Each child element must define LayoutParams that are appropriate for its parent, though it may also define different LayoutParams for its own children.
+    http://developer.android.com/guide/topics/ui/declaring-layout.html#Position
+
+    - Performance tips from smashing magagazine
+    http://coding.smashingmagazine.com/2012/11/05/writing-fast-memory-efficient-javascript/
+
+    - Google web toolkit (panels)
+    https://developers.google.com/web-toolkit/doc/latest/DevGuideUiPanels
+
+    JsPef
+    http://jsperf.com/document-fragments-vs-appendchild/2
+    http://jsperf.com/building-and-appending-to-the-dom/2
+
+---------------------------------------------------------------------------------------
+
+  Reflow Notes
+
+---------------------------------------------------------------------------------------
+  
+  [list]
+    (self) axis: vertical | horizontal
+    (self) contain: true | false
+    (self) scroll: true | false
+    (self) minWeight: 0
+    (self) maxWeight: 0
+    (child) weight: px
+    (child) enable: true | false
+
+  ----
+
+  Grid:
+    Columns[list]: (width, height) (enable, min_width, max_width, force_fit, resizable, draggable)
+      Column: (enable, weight) (edit_tile)
+    Rows[list]: (enable, min_height, max_height, force_fit, resizable, draggable, row_tile)
+      Row: (enable, height)
+    Table[list]:
+      Line: (model)
+        Cell: () <react_event>
+
+  ----
+  
+  Root
+    Screen
+      Header
+      Dash
+        Widget
+          Header
+          Menu
+          Body
+          Footer
+        Dash
+          Widget
+          Dash
+            Widget
+            Widget
+          Widget
