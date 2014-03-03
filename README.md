@@ -181,49 +181,49 @@ In the main require configuration, we should define our root module paths. One p
 should be set to wherever specific application tiles are located.  Additional paths can be defined for other tilesets, like widgets, or 3rd party tilesets.
 
 ```js
-	requirejs.config({
-			paths: {
-  				dash: 'lib/dash/tiles',
-  				app: 'app/tiles',
+requirejs.config({
+		paths: {
+				dash: 'lib/dash/tiles',
+				app: 'app/tiles',
 
-  				tile: 'lib/dash/require/tile',
-  				Dash: 'lib/dash/dash'
-		}
-	});
+				tile: 'lib/dash/require/tile',
+				Dash: 'lib/dash/dash'
+	}
+});
 ```
 
 In this example, I have mapped the path 'dash' to lib/dash/tiles for the core dash tilset and the path 'app' to app/tiles for the application specific tiles.
 In addition, I have written a custom require.js plugin for loading tiles.  This should be defined in the main require.js config.  The last essential item to be
 defined in the config is the location of the core Dash object, which contains these properties:
 ```js
-	Dash = {
-		Tile,		# This is the base Tile class that all tiles inherit from.
-		Tiles, 		# Object that contains the full paths of all the loaded tiles.  This is managed by the custom tile require.js plugin.
-		Dragdrop,	# Object used by the Root Tile to manage drag-and-drop
-		Options,	# Object used by all Tiles to handle option management.
-		root,		# This should be set to the instance of the Root Tile after it has been constructed by the application.
-	}
+Dash = {
+	Tile,		 // This is the base Tile class that all tiles inherit from.
+	Tiles, 	 // Object that contains the full paths of all the loaded tiles.  This is managed by the custom tile require.js plugin.
+	Dragdrop, // Object used by the Root Tile to manage drag-and-drop
+	Options,	// Object used by all Tiles to handle option management.
+	root,		 // This should be set to the instance of the Root Tile after it has been constructed by the application.
+}
 ```
 
 The Dash Object should be loaded by main.js and should be used along with Root.tile.js to bootstrap the application. A minimal bootsrap would look like this:
 ```js
-	requirejs(['Dash', 'tile!dash/root'], function(Dash, Root) {
-		Dash.root = new Root();
-		Dash.root.add([ ... definition of dash ...]);
-	});
+requirejs(['Dash', 'tile!dash/root'], function(Dash, Root) {
+	Dash.root = new Root();
+	Dash.root.add([ ... definition of dash ...]);
+});
 ```
 
 When calling for local tiles defined within an application module, you should always reference locally defined tiles (meaning in the same or nested directory)
 using the relative require.js path syntax using the "./" prefix.  This should come after the "tile!" but before the "tilename" path. An example of this would be:
 
 ```js
-	define(['jQuery', 'Underscore', 'Backbone', 'Dash', 'tile!./subtile'], function(jQuery, _, Backbone, Dash, Subtile) {
-		return Dash.Tile.extend({
-			... extend code ...
-			var subtile = newSubtile();
-			... extend code ...
-		});
+define(['jQuery', 'Underscore', 'Backbone', 'Dash', 'tile!./subtile'], function(jQuery, _, Backbone, Dash, Subtile) {
+	return Dash.Tile.extend({
+		... extend code ...
+		var subtile = newSubtile();
+		... extend code ...
 	});
+});
 ```
 
 This is how you would define a tile in a module to reference a locally defined "subtile".  By using relative references to locally defined tiles, the directory
@@ -233,22 +233,22 @@ If you want to embed a 3rd party project within a local application, require giv
 wanted to take the entire application for Deseret News and embed it within their own, they would configure require in their bootstrap like this:
 
 ```js
-	requirejs.config({
-			paths: {
-  				dash: 'lib/dash/tiles',
-  				app: 'app/tiles',
-			desnews: 'lib/desnews/tiles',
+requirejs.config({
+		paths: {
+				dash: 'lib/dash/tiles',
+				app: 'app/tiles',
+		desnews: 'lib/desnews/tiles',
 
-  				tile: 'lib/dash/require/tile',
-  				Dash: 'lib/dash/dash'
+				tile: 'lib/dash/require/tile',
+				Dash: 'lib/dash/dash'
+	}
+	map: {
+		'lib/desnews/exports': {
+			'dash': 'lib/desnews/lib/dash/tiles',
+			'app': 'lib/desnews/app/tiles'
 		}
-		map: {
-			'lib/desnews/exports': {
-				'dash': 'lib/desnews/lib/dash/tiles',
-				'app': 'lib/desnews/app/tiles'
-			}
-		}
-	});
+	}
+});
 ```
 
 You could then call a tile from a desnews exports directory by requiring "tile!desnews/theirwidget".  If this widget then went to call some core dash tiles
