@@ -41,22 +41,22 @@ we can simply create a new tile subclass that will act as a new layout for any c
 I have created several Tile subclasses specifically as layout engines.  They are as follows:
 
 * Positioner: All children are absolutely positioned and can be set to follow one of the following positioning modes:
-** position = 'screen'.  The child takes the size of the parent and is positioned to completely cover the parent. Because it's absolutely positioned,
+    * position = 'screen'.  The child takes the size of the parent and is positioned to completely cover the parent. Because it's absolutely positioned,
 multiple screen children can be layered on top of each other. Typically, only one child should be set to screen the parent.
 
-** position = 'offset'.  The child is sized by setting the width and height property, which if set to an integer value will fix the size of the tile.
+    * position = 'offset'.  The child is sized by setting the width and height property, which if set to an integer value will fix the size of the tile.
 If either one is set to 'auto', then the size will be determined by the content within the tile (Fluid Size). The position of
 the tile on the page is determined by the value of the x & y offset, which is relative to one of the four corners of the
 parent. You specify the corner by changing the value of the anchor parameter to either tl, tr, bl or br.  These stand for
 top-left, top-right, bottom-left and bottom-right respectively. This mode is what I use when a tile is in drag mode.
 
-** position = 'center'.  The child is sized the same way as 'offset', but is always vertically and horizontally centered within the parent.  This is
+    * position = 'center'.  The child is sized the same way as 'offset', but is always vertically and horizontally centered within the parent.  This is
 true whether the child is fixed or fluid in size.
 
-** position = 'dock'.    The child is sized the same way as 'offset', but is anchored to one of the sides of the parent tile.  I haven't implemented
+    * position = 'dock'.    The child is sized the same way as 'offset', but is anchored to one of the sides of the parent tile.  I haven't implemented
 this mode yet, so it won't work right now.
 
-** position = 'target'.	 The child is sized the same way as 'offset', but is positioned relative to a target DOM element within the page. You specify
+    * position = 'target'.	 The child is sized the same way as 'offset', but is positioned relative to a target DOM element within the page. You specify
 the element via the target parameter, and can specify an x & y value to offset the tile away from the target.  Where the tile
 is positioned relative to the target element depends on the values of the anchor and axis parameters.  The anchor determines
 which corner of the tile is used to position it against the target. The value of 'tl' will position the top-left corner of the
@@ -93,88 +93,88 @@ This is essentially the same layout used in Pivotal tracker.
 ## Tile methods
 
 * Constructor & Destructor
-** .initialize() << standard backbone.view initialize
-** .close(delspawned) << formerly known as shutdown(), setting delspawned=true will delete spawned children when closing.
+    * .initialize() << standard backbone.view initialize
+    * .close(delspawned) << formerly known as shutdown(), setting delspawned=true will delete spawned children when closing.
 
 * Tile Management
-** .detach() << detaches the tile from the parent
-** .replace(tile) << replaces this tile with another.  Will detach other tile before attaching it.
-** .find(cid) << recursively look for a tile by it's cid in the tree. For example, in the console type: Dash.root.find('view10');
-** .superFn(fnName, defaultValue, params...) << make a function call against the parent, and return defaultValue if no-parent.
-** .isType(Type) << given a tile constructor, test to see if this tile is of that type
-** .isSized() << test to see if the tile has been sized.
-** .isReflow() << test to see if a render will cause a local reflow
-** .debug() << call this from the terminal to see the tree. For example, in the console type: Dash.root.debug();
+    * .detach() << detaches the tile from the parent
+    * .replace(tile) << replaces this tile with another.  Will detach other tile before attaching it.
+    * .find(cid) << recursively look for a tile by it's cid in the tree. For example, in the console type: Dash.root.find('view10');
+    * .superFn(fnName, defaultValue, params...) << make a function call against the parent, and return defaultValue if no-parent.
+    * .isType(Type) << given a tile constructor, test to see if this tile is of that type
+    * .isSized() << test to see if the tile has been sized.
+    * .isReflow() << test to see if a render will cause a local reflow
+    * .debug() << call this from the terminal to see the tree. For example, in the console type: Dash.root.debug();
 
 * Spawn Relationships
-** .setSpawner(tile) << used by system when spawning a new tile
-** .despawn(tile) << used by system to cut spawning ties
+    * .setSpawner(tile) << used by system when spawning a new tile
+    * .despawn(tile) << used by system to cut spawning ties
 
 * Child Management
-** .addTile(tile, index, defaults) << this is how you add tiles to the parent.
-** .getTiles() << get all the children tiles. Used for serializing the child tiles.
-** .setTiles(tiles) << set all the children tiles. Used for de-serializing the child tiles.
-** .length() << get the number of child tiles
-** .atIndex(index) << get the child at the specified index
-** .indexOf(tile) << get the index of the child at the specified index
-** .parentInit(parent) << (OVERRIDE) called when being attached to a parent to allow binding or other parent initialization.
-** .childInit(child) << (OVERRIDE) called when attaching a child to a parent to allow binding or other child initiailziation.
-** .closeChild(child) << (OVERRIDE) called when detaching a child from a parent to allow for unbiding or other child shutdown.
+    * .addTile(tile, index, defaults) << this is how you add tiles to the parent.
+    * .getTiles() << get all the children tiles. Used for serializing the child tiles.
+    * .setTiles(tiles) << set all the children tiles. Used for de-serializing the child tiles.
+    * .length() << get the number of child tiles
+    * .atIndex(index) << get the child at the specified index
+    * .indexOf(tile) << get the index of the child at the specified index
+    * .parentInit(parent) << (OVERRIDE) called when being attached to a parent to allow binding or other parent initialization.
+    * .childInit(child) << (OVERRIDE) called when attaching a child to a parent to allow binding or other child initiailziation.
+    * .closeChild(child) << (OVERRIDE) called when detaching a child from a parent to allow for unbiding or other child shutdown.
 
 * Options API
-** .bind(name, params) << this is how you bind an option to the tile. Params is a configuration object
-** .unbind(name, buffer) << this is how you unbind an option from the tile. Buffer is a boolen that specifies whether to save values to buffer.
-** .set(name, value) << universal option setter.  Can be either name-value pair, or name can be an object of multiple name-value pairs.
-** .get(name) << universal option getter. If you don't specify a name, all options will be returned.
-** .setter(name, value, target) << default setter for options that don't have a setter and are targeted to this.
-** .getter(name, target) << default getter for options that don't have a getter and are targeted to this.
-** .bindThis(bindings) << wrapper for bind to simplify binding local options to this. Used by a tile to bind non-geometry properties.
-** .bindChild(tile, bindings) << wrapper for bind to simplify binding child options to this. Used by parent to bind to child's geometry properties.
-** .bindTile(name, tile, index) << wrapper for bind to simplify adding & binding new child tiles. Used by widgets to expose child header, menu & component properties.
-** .bindModel(name, model, options) << wrapper for bind to simplify adding & binding new child models.  Similar addModel() method in old dash widgets.
+    * .bind(name, params) << this is how you bind an option to the tile. Params is a configuration object
+    * .unbind(name, buffer) << this is how you unbind an option from the tile. Buffer is a boolen that specifies whether to save values to buffer.
+    * .set(name, value) << universal option setter.  Can be either name-value pair, or name can be an object of multiple name-value pairs.
+    * .get(name) << universal option getter. If you don't specify a name, all options will be returned.
+    * .setter(name, value, target) << default setter for options that don't have a setter and are targeted to this.
+    * .getter(name, target) << default getter for options that don't have a getter and are targeted to this.
+    * .bindThis(bindings) << wrapper for bind to simplify binding local options to this. Used by a tile to bind non-geometry properties.
+    * .bindChild(tile, bindings) << wrapper for bind to simplify binding child options to this. Used by parent to bind to child's geometry properties.
+    * .bindTile(name, tile, index) << wrapper for bind to simplify adding & binding new child tiles. Used by widgets to expose child header, menu & component properties.
+    * .bindModel(name, model, options) << wrapper for bind to simplify adding & binding new child models.  Similar addModel() method in old dash widgets.
 
 * Change Management
-** .beginChange() << signal to tell the dash changes are about to begin.  Wrap all changes with beginChange() and endChange(). Can be nested.
-** .endChange() << signal to tell the dash changes are finished. When last nested endChange() call is made, a reflow of the dash is initiated.
-** .markChange(tile) << signal to tell the dash this tile needs a reflow.  Do this after beginChange() and before endChange()
-** .deferChange(fn) << used by resizer tiles to defer self-closing to end of all changes but before reflow.
-** .bubble(tile, child) << system call made after all changes but before reflow rendering to determine top relfow nodes in the tree.
-** .render() << (OVERRIDE) default render code for a nested to to resize its children.  Subclasses should override this! Will be wrapped by tile constructor!
-** .rendered() << will be automatically called after render() because it has been wrapped.  Clears the reflow change flags.
-** .renderTile(tile, css) << set the css on a child tile and trigger child to re-render. Called during a reflow.
+    * .beginChange() << signal to tell the dash changes are about to begin.  Wrap all changes with beginChange() and endChange(). Can be nested.
+    * .endChange() << signal to tell the dash changes are finished. When last nested endChange() call is made, a reflow of the dash is initiated.
+    * .markChange(tile) << signal to tell the dash this tile needs a reflow.  Do this after beginChange() and before endChange()
+    * .deferChange(fn) << used by resizer tiles to defer self-closing to end of all changes but before reflow.
+    * .bubble(tile, child) << system call made after all changes but before reflow rendering to determine top relfow nodes in the tree.
+    * .render() << (OVERRIDE) default render code for a nested to to resize its children.  Subclasses should override this! Will be wrapped by tile constructor!
+    * .rendered() << will be automatically called after render() because it has been wrapped.  Clears the reflow change flags.
+    * .renderTile(tile, css) << set the css on a child tile and trigger child to re-render. Called during a reflow.
 
 * DOM Interaction
-** .clearCSS() << clear the local css styles.  Called when a child is attached to a new parent.
-** .getWidth() << get the width of the tile.  Will use local value to prevent browser DOM reflow if present.
-** .getHeight() << get the height of the tile.  Will use local value to prevent browser DOM reflow if present.
-** .getPad() << get the element padding + border + margin.  Used by the system to adjust sizing for tiles styled by classes.
-** .captureGeometry($el) << called before detaching from parent to capture it's geometry. Used when dragging.
+    * .clearCSS() << clear the local css styles.  Called when a child is attached to a new parent.
+    * .getWidth() << get the width of the tile.  Will use local value to prevent browser DOM reflow if present.
+    * .getHeight() << get the height of the tile.  Will use local value to prevent browser DOM reflow if present.
+    * .getPad() << get the element padding + border + margin.  Used by the system to adjust sizing for tiles styled by classes.
+    * .captureGeometry($el) << called before detaching from parent to capture it's geometry. Used when dragging.
 
 * Drag Events
-** .setDrag(state) << (OVERRIDE) enable the tile to be dragged.  All this does is add a .drag class to the tile.  The root tile takes care of the rest.
-** .dragInit(ev, dd) << (OVERRIDE) called when initializing a drag. return true to capture the drag or false to pass event to parent tile.
-** .dragStart(ev, dd) << (OVERRIDE) called when tile is starting to be dragged, i.e. has moved a pixel.  Use to set initial conditions within dd object.
-** .dragMove(ev, dd) << (OVERRIDE) called when tile is being dragged.
-** .dragEnd(ev, dd) << (OVERRIDE) called when tile is done being dragged. Only called if dragStart was called.
-** .dragFinish(ev, dd) << (OVERRIDE) called when tile is totally finished with drag. Clean-up anything set-up within dragInit.
+    * .setDrag(state) << (OVERRIDE) enable the tile to be dragged.  All this does is add a .drag class to the tile.  The root tile takes care of the rest.
+    * .dragInit(ev, dd) << (OVERRIDE) called when initializing a drag. return true to capture the drag or false to pass event to parent tile.
+    * .dragStart(ev, dd) << (OVERRIDE) called when tile is starting to be dragged, i.e. has moved a pixel.  Use to set initial conditions within dd object.
+    * .dragMove(ev, dd) << (OVERRIDE) called when tile is being dragged.
+    * .dragEnd(ev, dd) << (OVERRIDE) called when tile is done being dragged. Only called if dragStart was called.
+    * .dragFinish(ev, dd) << (OVERRIDE) called when tile is totally finished with drag. Clean-up anything set-up within dragInit.
 
 * Drop Events
-** .setDrop(state) << (OVERRIDE) enable the tile to be dropped into. All this does is add a .drop class to the tile.  The root tile takes care of the rest.
-** .dropInit(ev, dd) << (OVERRIDE) called when a drag is starting to check to see if this is a dropzone.  Return true if it is a dropzone.
-** .dropOver(ev, dd) << (OVERRIDE) called when a drag enters the dropzone. (DRAGENTER)
-** .dropMove(ev, dd) << (OVERRIDE) called when a drag moves within the dropzone. (DRAGOVER)
-** .dropOut(ev, dd) << (OVERRIDE) called when a drag leaves the dropzone. (DRAGLEAVE)
-** .dropCommit(ev, dd) << (OVERRIDE) called to test whether the dropzone accepted the drop.  Return true to accept, false to reject. (DROP)
-** .dropFinish(ev, dd) << (OVERRIDE) called to clean-up anything set-up within dropInit.
+    * .setDrop(state) << (OVERRIDE) enable the tile to be dropped into. All this does is add a .drop class to the tile.  The root tile takes care of the rest.
+    * .dropInit(ev, dd) << (OVERRIDE) called when a drag is starting to check to see if this is a dropzone.  Return true if it is a dropzone.
+    * .dropOver(ev, dd) << (OVERRIDE) called when a drag enters the dropzone. (DRAGENTER)
+    * .dropMove(ev, dd) << (OVERRIDE) called when a drag moves within the dropzone. (DRAGOVER)
+    * .dropOut(ev, dd) << (OVERRIDE) called when a drag leaves the dropzone. (DRAGLEAVE)
+    * .dropCommit(ev, dd) << (OVERRIDE) called to test whether the dropzone accepted the drop.  Return true to accept, false to reject. (DROP)
+    * .dropFinish(ev, dd) << (OVERRIDE) called to clean-up anything set-up within dropInit.
 
 * Clickout Events
-** .setClickout(state) << Enable the custom clickout event. True = enable clickout event. False = disable clickout event.
-** .isClickIn() << System call used by clickout to determine if a click within this tile will trigger a clickout event in the tree.
-** .onClickout() << (OVERRIDE) called when clickout enabled on the tile and a clickout has occurred.
+    * .setClickout(state) << Enable the custom clickout event. True = enable clickout event. False = disable clickout event.
+    * .isClickIn() << System call used by clickout to determine if a click within this tile will trigger a clickout event in the tree.
+    * .onClickout() << (OVERRIDE) called when clickout enabled on the tile and a clickout has occurred.
 
 * Event Capture
-** .addEvent(el, types, fn) << Attach a capture event to a DOM element. Used by some system-level events
-** .removeEvent(el, types, fn) << Detach a capture event from a DOM element. Used by some system-level events.
+    * .addEvent(el, types, fn) << Attach a capture event to a DOM element. Used by some system-level events
+    * .removeEvent(el, types, fn) << Detach a capture event from a DOM element. Used by some system-level events.
 
 * Require.js
 In the main require configuration, we should define our root module paths. One path should be set to wherever the core dash tileset is located.  Another path
